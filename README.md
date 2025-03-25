@@ -1,4 +1,4 @@
-##VI
+#VI
 # Now Cloud 
 
 Now Cloud là nền tảng **Cloud Gaming miễn phí**, giúp bạn chơi các tựa game yêu thích trên mọi thiết bị mà không cần cài đặt nặng nề. Chỉ cần kết nối internet, bạn có thể trải nghiệm nhiều tựa game hấp dẫn ngay lập tức.
