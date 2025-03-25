@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Now Cloud - Chơi game cao cấp ngay lập tức từ đám mây mà không cần tải xuống">
+    <title>Now Cloud</title>
+    <meta name="description" content="Now Cloud - Treo Game Miễn Phí.">
+    <meta name="keywords" content="Now Cloud, chơi game đám mây, cloud gaming, game online, game không cần tải, game streaming">
+    <meta name="author" content="Now Cloud Team">
+    <meta name="robots" content="index, follow">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f0ff',
+                            100: '#e2e1ff',
+                            200: '#c9c7ff',
+                            300: '#a9a7ff',
+                            400: '#8785ff',
+                            500: '#5D5CDE',
+                            600: '#4645c2',
+                            700: '#38379d',
+                            800: '#2f2e81',
+                            900: '#252469',
+                        },
+                        secondary: {
+                            50: '#fff0f0',
+                            100: '#ffe1e1',
+                            200: '#ffc7c7',
+                            300: '#ffa7a7',
+                            400: '#ff8585',
+                            500: '#FF5757',
+                            600: '#ff2424',
+                            700: '#ed0000',
+                            800: '#c40000',
+                            900: '#9d0000',
+                        },
+                        dark: {
+                            900: '#121212',
+                            800: '#181818',
+                            700: '#222222',
+                            600: '#2d2d2d',
+                            500: '#3a3a3a',
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    },
+                    dropShadow: {
+                        'glow-primary': '0 0 8px rgba(93, 92, 222, 0.5)',
+                        'glow-secondary': '0 0 8px rgba(255, 87, 87, 0.5)',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                    }
+                }
+            }
+        }
+
+
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .game-card {
+            transition: all 0.3s ease;
+            transform: perspective(800px) rotateY(0);
+        }
+
+        .game-card:hover {
+            transform: perspective(800px) rotateY(5deg) translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .game-card:hover .play-button {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .play-button {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active .nav-icon {
+            filter: drop-shadow(0 0 3px rgba(93, 92, 222, 0.7));
+        }
+
+        .nav-item.active .nav-text {
+            font-weight: 600;
+        }
+
+        /* Tùy chỉnh thanh cuộn (Custom scrollbar) */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(93, 92, 222, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(93, 92, 222, 0.7);
+        }
+
+        /* Hoạt ảnh tải (Loader animation) */
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(93, 92, 222, 0.3);
+            border-radius: 50%;
+            border-top-color: rgba(93, 92, 222, 1);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .dark .loader {
+            border-color: rgba(93, 92, 222, 0.2);
+            border-top-color: rgba(137, 136, 255, 1);
+        }
+
+        /* Hoạt ảnh modal chi tiết game (Game detail modal animation) */
+        .modal-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+        }
+
+        .modal-content {
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Hoạt ảnh khởi chạy game (Game launch animation) */
+        .game-launch-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .game-launch-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .game-launch-content {
+            transform: scale(0.95);
+            transition: transform 0.5s ease;
+        }
+
+        .game-launch-overlay.active .game-launch-content {
+            transform: scale(1);
+        }
+
+        /* Tối ưu hóa cho thiết bị di động (Mobile optimization) */
+        @media (max-width: 640px) {
+            .game-card .play-button {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hoạt ảnh tải game (Game loading animation) */
+        .game-loading-dots .dot {
+            animation: loadingDot 1.5s infinite;
+        }
+
+        .game-loading-dots .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .game-loading-dots .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes loadingDot {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-dark-900 text-gray-800 dark:text-gray-200 min-h-screen flex flex-col">
+    <!-- Header với nền gradient -->
+    <header class="relative bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-800 dark:to-primary-700">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI0MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImEiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRhPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblRyYW5zZm9ybT0icm90YXRlKDQ1KSI>PHBhdGggZD0iTTAgMTBoNDBNMTAgMHY0ME0wIDIwaDQwTTIwIDB2NDBNMCAzMGh4ME0zMCAwdjQwIiBmaWxsPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZT0iI2ZmZiIgb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2EpIi8+PC9zdmc+')]"></div>
+        <div class="container mx-auto relative z-10">
+            <div class="p-4 flex justify-between items-center">
+                <!-- Logo và tiêu đề -->
+                <div class="flex items-center">
+                    <div class="mr-2 w-8 h-8 rounded-full bg-white dark:bg-primary-900 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500 dark:text-primary-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V5z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-white drop-shadow-md">Now Cloud</h1>
+                </div>
+                <!-- Nút chọn game và làm mới -->
+                <div class="flex items-center space-x-3">
+                    <button class="bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all text-sm font-medium px-3 py-1.5 rounded-full shadow-md">
+                        <a href="https://bom.so/huongdan" target="_blank" class="flex items-center space-x-1">
+                            <span>Hướng dẫn sử dụng</span>
+                        </a>
+                    </button>
+                    <div class="relative">
+                        <button id="deviceDropdown" class="flex items-center space-x-1 text-sm font-medium px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </div>
+                    <button id="refreshButton" class="bg-secondary-500 hover:bg-secondary-600 transition-all text-white text-sm font-medium px-3 py-1.5 rounded-full flex items-center space-x-1 shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Làm mới</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Thanh trạng thái VIP -->
+    <div class="bg-gradient-to-r from-orange-400/20 to-orange-300/10 dark:from-orange-900/30 dark:to-orange-800/20 backdrop-blur-sm px-4 py-2.5">
+        <div class="container mx-auto">
+            <div class="inline-block px-4 py-1 bg-gradient-to-r from-orange-400 to-orange-500 dark:from-orange-600 dark:to-orange-700 text-white rounded-full text-xs font-medium shadow-sm">
+                <div class="flex items-center space-x-2">
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    <span>SVIP | Singapore</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nội dung chính -->
+    <main class="flex-grow container mx-auto p-4">
+        <!-- Danh mục game -->
+        <section class="overflow-x-auto mb-6 py-2">
+            <div class="flex space-x-3 min-w-max">
+                <button class="bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md whitespace-nowrap">
+                    Tất cả game
+                </button>
+                <button class="bg-white dark:bg-dark-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-full text-sm font-medium shadow-md whitespace-nowrap hover:bg-primary-50 dark:hover:bg-dark-600 transition-all">
+                    Nhập vai
+                </button>
+                <button class="bg-white dark:bg-dark-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-full text-sm font-medium shadow-md whitespace-nowrap hover:bg-primary-50 dark:hover:bg-dark-600 transition-all">
+                    Chiến thuật
+                </button>
+            </div>
+        </section>
+
+        <!-- Phần Game nổi bật -->
+        <section class="mt-2 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Game nổi bật</h2>
+                <a href="#" class="text-primary-500 dark:text-primary-400 text-sm font-medium hover:underline">Xem tất cả</a>
+            </div>
+
+            <!-- Lưới các thẻ game -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="featuredGamesGrid">
+                <!-- Game cards will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Phần Game phổ biến -->
+        <section class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Game phổ biến</h2>
+                <a href="#" class="text-primary-500 dark:text-primary-400 text-sm font-medium hover:underline">Xem tất cả</a>
+            </div>
+
+            <!-- Lưới các thẻ game -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="popularGamesGrid">
+                <!-- Game cards for popular games will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Đã chơi gần đây -->
+        <section>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Đã chơi gần đây</h2>
+                <a href="#" class="text-primary-500 dark:text-primary-400 text-sm font-medium hover:underline">Xem lịch sử</a>
+            </div>
+
+            <div class="bg-white dark:bg-dark-700 rounded-2xl p-6 shadow-md">
+                <div class="flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-dark-600 flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-center text-gray-500 dark:text-gray-400 mb-1">Chưa có game nào được chơi gần đây</p>
+                    <p class="text-center text-gray-400 dark:text-gray-500 text-sm">Các game bạn đã chơi gần đây sẽ xuất hiện ở đây</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Thanh điều hướng -->
+    <footer class="bg-white dark:bg-dark-800 border-t border-gray-200 dark:border-gray-700 py-1 shadow-lg">
+        <div class="container mx-auto">
+            <div class="flex justify-around">
+                <button class="nav-item active flex flex-col items-center py-2 px-4 text-primary-500 dark:text-primary-400" onclick="window.location.href='#'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span class="nav-text text-xs mt-1">Trang chủ</span>
+                </button>
+                <button class="nav-item flex flex-col items-center py-2 px-4 text-gray-500 dark:text-gray-400" onclick="window.location.href='#'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span class="nav-text text-xs mt-1">Khám phá</span>
+                </button>
+                <button class="nav-item flex flex-col items-center py-2 px-4 text-gray-500 dark:text-gray-400" onclick="window.location.href='#'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span class="nav-text text-xs mt-1">Cửa hàng</span>
+                </button>
+                <button class="nav-item flex flex-col items-center py-2 px-4 text-gray-500 dark:text-gray-400" onclick="window.location.href='#'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span class="nav-text text-xs mt-1">Hồ sơ</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal chi tiết game -->
+    <div id="gameDetailModal" class="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-dark-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="relative">
+                <div class="h-48 bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-800 dark:to-primary-700 overflow-hidden">
+                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI0MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImEiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRhPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblRyYW5zZm9ybT0icm90YXRlKDQ1KSI>PHBhdGggZD0iTTAgMTBoNDBNMTAgMHY0ME0wIDIwaDQwTTIwIDB2NDBNMCAzMGh4ME0zMCAwdjQwIiBmaWxsPSJub25lIiBzdHJva2Utd2lkd2g9IjEiIHN0cm9rZT0iI2ZmZiIgb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2EpIi8+PC9zdmc+')]"></div>
+                    <div id="modalGameImage" class="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-2xl overflow-hidden border-4 border-white dark:border-dark-800 shadow-xl"></div>
+                </div>
+
+                <button id="closeDetailModal" class="absolute right-3 top-3 p-2 bg-black/20 hover:bg-black/30 transition-all rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="pt-20 px-5 pb-6">
+                <div class="text-center mb-4">
+                    <h2 id="modalGameTitle" class="text-xl font-bold text-gray-800 dark:text-white"></h2>
+                    <p id="modalGameGenre" class="text-sm text-gray-500 dark:text-gray-400"></p>
+                </div>
+
+                <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-dark-700 rounded-xl mb-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600 dark:text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Game đã sẵn sàng</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Bắt đầu chơi ngay</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Máy chủ</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Singapore</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mô tả</h3>
+                        <p id="modalGameDescription" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed"></p>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Kích thước</h3>
+                            <p id="modalGameSize" class="text-sm text-gray-600 dark:text-gray-400">2.1 GB</p>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Người chơi</h3>
+                            <p id="modalGamePlayers" class="text-sm text-gray-600 dark:text-gray-400">5,245</p>
+                        </div>
+                        <div class="text-right">
+                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Độ tuổi</h3>
+                            <p id="modalGameRating" class="text-sm text-gray-600 dark:text-gray-400">12+</p>
+                        </div>
+                    </div>
+
+                    <button id="modalPlayButton" class="w-full py-3 bg-primary-500 hover:bg-primary-600 transition-all text-white rounded-xl text-sm font-medium flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Chơi ngay</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lớp phủ khởi chạy game -->
+    <div id="gameLaunchOverlay" class="game-launch-overlay fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center">
+        <div class="game-launch-content w-full max-w-lg px-6 py-8">
+            <div class="flex flex-col items-center">
+                <div id="gameIcon" class="w-24 h-24 rounded-2xl mb-6 overflow-hidden"></div>
+
+                <h2 id="launchGameTitle" class="text-white text-xl font-bold mb-2 text-center"></h2>
+                <p class="text-gray-300 text-sm mb-8 text-center">Đang khởi tạo máy chủ chơi game đám mây</p>
+
+                <div class="w-full h-2 bg-gray-700 rounded-full mb-8 overflow-hidden">
+                    <div id="loadingProgressBar" class="h-full bg-gradient-to-r from-primary-500 to-primary-400 w-0 transition-all duration-300 ease-out"></div>
+                </div>
+
+                <div class="flex space-x-4 items-center justify-center game-loading-dots mb-8">
+                    <div class="dot w-3 h-3 rounded-full bg-primary-400"></div>
+                    <div class="dot w-3 h-3 rounded-full bg-primary-400"></div>
+                    <div class="dot w-3 h-3 rounded-full bg-primary-400"></div>
+                </div>
+
+                <p id="loadingMessage" class="text-gray-300 text-sm mb-6 text-center">Đang kết nối đến máy chủ...</p>
+
+                <button id="cancelLaunch" class="px-6 py-2 border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white rounded-lg transition-all">
+                    Hủy bỏ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gamesData = [
+            {
+                id: 8,
+                title: "UgPhone Mobile",
+                genre: "Cloud Gaming",
+                image: "https://play-lh.googleusercontent.com/3EEJLviqFWAuHJWpmILUotvTfaFtV34KaEDoZrYAhGziOGVaHNbRZ1z7xwG-VdcdxQs",
+                description: "UgPhone - Nền tảng cloud gaming để chơi game mobile trên PC.",
+                size: "Cloud-based",
+                players: "Varies",
+                rating: "Mọi lứa tuổi",
+                playUrl: "https://yeumoney.com/MrSs4WJx"
+            },
+            {
+                id: 9,
+                title: "Redfinger Mobile",
+                genre: "Cloud Gaming",
+                image: "https://taphoammo.net/img/redfinger-trial-6h-12h_883344297.png",
+                description: "Redfinger - Chơi game Android trên cloud, mọi lúc, mọi nơi.",
+                size: "Cloud-based",
+                players: "Varies",
+                rating: "Mọi lứa tuổi",
+                playUrl: "https://yeumoney.com/MrSs4WJx"
+            },
+            {
+                id: 10,
+                title: "Redfinger PC",
+                genre: "Cloud Gaming",
+                image: "https://taphoammo.net/img/redfinger-trial-6h-12h_883344297.png",
+                description: "Redfinger - Chơi game Android trên cloud, mọi lúc, mọi nơi.",
+                size: "Cloud-based",
+                players: "Varies",
+                rating: "Mọi lứa tuổi",
+                playUrl: "https://yeumoney.com/sIDIKCHoEVg"
+            },
+            {
+                id: 11,
+                title: "UgPhone PC",
+                genre: "Cloud Gaming",
+                image: "https://play-lh.googleusercontent.com/3EEJLviqFWAuHJWpmILUotvTfaFtV34KaEDoZrYAhGziOGVaHNbRZ1z7xwG-VdcdxQs",
+                description: "UgPhone - Nền tảng cloud gaming để chơi game mobile trên PC.",
+                size: "Cloud-based",
+                players: "Varies",
+                rating: "Mọi lứa tuổi",
+                playUrl: "https://yeumoney.com/sIDIKCHoEVg"
+            },
+            {
+                id: 1,
+                title: "Hub Mobile",
+                genre: "Nhập vai",
+                image: "https://dl.memuplay.com/new_market/img/com.laminaung.gaminghub.icon.2024-12-18-06-12-31.png",
+                description: "FREE GAME TẢI FULL GAME CHO ANDROID",
+                size: "1 GB",
+                players: "5,245",
+                rating: "12+",
+                playUrl: "https://bom.so/eJjbJG"
+            },
+            {
+                id: 2,
+                title: "Giả Lập PPSSPP ",
+                genre: "Chiến thuật",
+                image: "https://help.zalo.me/wp-content/uploads/2023/08/z4650065944256_2971e71cc06a5cfcb0aef41782e5f30e.jpg",
+                description: "Phù hợp chơi game giả lập",
+                size: "1.8 GB",
+                players: "8,742",
+                rating: "16+",
+                playUrl: "https://bom.so/6vg5Yp"
+            },
+            {
+                id: 3,
+                title: "Roblox Mobile",
+                genre: "Phiêu lưu",
+                image: "https://tse2.mm.bing.net/th?id=OIP.5igkiu-2TeXGT6AJdyA0SQHaD4&w=248&h=248&c=7",
+                description: "Khám phá vũ trụ rộng lớn của các trò chơi được tạo bởi người dùng.",
+                size: "1.2 GB",
+                players: "20,000+",
+                rating: "10+",
+                playUrl: "https://bom.so/eJjbJG"
+            },
+            {
+                id: 4,
+                title: "Roblox VNG",
+                genre: "Phiêu lưu",
+                image: "https://tse2.mm.bing.net/th?id=OIP.5igkiu-2TeXGT6AJdyA0SQHaD4&w=248&h=248&c=7",
+                description: "Phiên bản Việt Nam của nền tảng trò chơi Roblox phổ biến.",
+                size: "1.2 GB",
+                players: "15,000+",
+                rating: "10+",
+                playUrl: "https://bom.so/eJjbJG"
+            },
+            {
+                id: 5,
+                title: "NGỌC RỒNG ONLINE",
+                genre: "Hành động RPG",
+                image: "https://tse2.mm.bing.net/th?id=OIP.Aan30HY1ftxxUVxJiZQLhAHaHa&w=474&h=474&c=7",
+                description: "Bước vào thế giới Dragon Ball, huấn luyện chiến binh của bạn.",
+                size: "50 MB",
+                players: "10,500+",
+                rating: "12+",
+                playUrl: "https://yeumoney.com/MrSs4WJx"
+            },
+            {
+                id: 6,
+                title: "Honkai Impact 3rd PC",
+                genre: "Hành động",
+                image: "https://play-lh.googleusercontent.com/qMce8ArvLjy_vw9DUgAVsRZBbKZKzpkvG_GYFhFmYSeqeiSRt1j0P9SQczGUp1-64E8",
+                description: "Tham gia cùng các Valkyrie trong trận chiến hoành tráng chống lại Honkai.",
+                size: "4.5 GB",
+                players: "50,000+",
+                rating: "12+",
+                playUrl: "https://bom.so/6vg5Yp"
+            },
+            {
+                id: 7,
+                title: "Genshin Impact PC",
+                genre: "RPG Thế giới mở",
+                image: "https://upload.wikimedia.org/wikipedia/vi/0/0a/Genshin_Impact_cover.jpg",
+                description: "Khám phá thế giới phép thuật Teyvat, gặp gỡ các nhân vật độc đáo.",
+                size: "15 GB",
+                players: "100,000+",
+                rating: "12+",
+                playUrl: "https://bom.so/6vg5Yp"
+            }
+        ];
+
+        const gameDetailModal = document.getElementById('gameDetailModal');
+        const modalGameImage = document.getElementById('modalGameImage');
+        const modalGameTitle = document.getElementById('modalGameTitle');
+        const modalGameGenre = document.getElementById('modalGameGenre');
+        const modalGameDescription = document.getElementById('modalGameDescription');
+        const modalGameSize = document.getElementById('modalGameSize');
+        const modalGamePlayers = document.getElementById('modalGamePlayers');
+        const modalGameRating = document.getElementById('modalGameRating');
+        const modalPlayButton = document.getElementById('modalPlayButton');
+        const closeDetailModal = document.getElementById('closeDetailModal');
+
+        const gameLaunchOverlay = document.getElementById('gameLaunchOverlay');
+        const gameIcon = document.getElementById('gameIcon');
+        const launchGameTitle = document.getElementById('launchGameTitle');
+        const loadingProgressBar = document.getElementById('loadingProgressBar');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const cancelLaunch = document.getElementById('cancelLaunch');
+
+        function launchGame(game) {
+    launchGameTitle.textContent = game.title;
+    gameIcon.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = game.image;
+    img.alt = game.title;
+    img.className = 'w-full h-full object-cover';
+    gameIcon.appendChild(img);
+    gameLaunchOverlay.classList.add('active');
+    loadingProgressBar.style.width = '0%';
+    loadingProgressBar.style.transition = 'width 0.3s ease-in-out';
+    loadingMessage.textContent = "Bắt đầu tải game...";
+    
+    let progress = 0;
+    const loadingSteps = [
+        "Đang kết nối đến máy chủ...",
+        "Đang khởi tạo phiên bản đám mây...",
+        "Đang tải tài nguyên game...",
+        "Đang chuẩn bị môi trường game...",
+        "Đang bắt đầu phiên chơi..."
+    ];
+    
+    let stepIndex = 0;
+    const totalDuration = 5000; // 5 giây
+    const stepDuration = totalDuration / loadingSteps.length;
+    
+    const interval = setInterval(() => {
+        let randomIncrement = Math.floor(Math.random() * 5) + 2; // Ngẫu nhiên từ 2 đến 7
+        progress += randomIncrement;
+        if (progress > 100) progress = 100;
+        
+        loadingProgressBar.style.width = `${progress}%`;
+        
+        if (progress >= (stepIndex + 1) * 20 && stepIndex < loadingSteps.length) {
+            loadingMessage.textContent = loadingSteps[stepIndex];
+            stepIndex++;
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                loadingMessage.textContent = "Game đã sẵn sàng! Bắt đầu ngay...";
+                setTimeout(() => {
+                    window.location.href = game.playUrl;
+                }, 1000);
+            }, 500);
+        }
+    }, stepDuration / 5);
+}
+
+        cancelLaunch.addEventListener('click', () => {
+            gameLaunchOverlay.classList.remove('active');
+            for (let i = 1; i < 10000; i++) {
+                window.clearInterval(i);
+            }
+        });
+
+        function showGameDetails(gameId) {
+            const game = gamesData.find(g => g.id === gameId);
+            if (game) {
+                modalGameTitle.textContent = game.title;
+                modalGameGenre.textContent = game.genre;
+                modalGameDescription.textContent = game.description;
+                modalGameSize.textContent = game.size;
+                modalGamePlayers.textContent = game.players;
+                modalGameRating.textContent = game.rating;
+                modalGameImage.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = game.image;
+                img.alt = game.title;
+                img.className = 'w-full h-full object-cover';
+                modalGameImage.appendChild(img);
+                modalPlayButton.onclick = () => {
+                    closeModal();
+                    launchGame(game);
+                };
+                gameDetailModal.classList.remove('hidden');
+                setTimeout(() => {
+                    gameDetailModal.classList.add('active');
+                }, 10);
+            }
+        }
+
+        function closeModal() {
+            gameDetailModal.classList.remove('active');
+            setTimeout(() => {
+                gameDetailModal.classList.add('hidden');
+            }, 300);
+        }
+        closeDetailModal.addEventListener('click', closeModal);
+        gameDetailModal.addEventListener('click', (event) => {
+            if (event.target === gameDetailModal) {
+                closeModal();
+            }
+        });
+
+        function updateRecentlyPlayed(game) {
+            const recentlyPlayedSection = document.querySelector('section:last-of-type');
+            const recentlyPlayedContent = recentlyPlayedSection.querySelector('div:last-child');
+            recentlyPlayedContent.innerHTML = '';
+            const gameElement = document.createElement('div');
+            gameElement.className = 'game-card bg-white dark:bg-dark-700 rounded-2xl shadow-lg overflow-hidden relative group';
+            gameElement.dataset.gameId = game.id;
+            let gameContent = `
+                <div class="p-4 flex items-center space-x-4">
+                    <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                        <img src="${game.image}" alt="${game.title}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="font-medium text-gray-800 dark:text-gray-100">${game.title}</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${game.genre}</p>
+                        <div class="mt-2 flex items-center space-x-2">
+                            <span class="inline-block px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded text-xs font-medium">
+                                Đã chơi lần cuối: Vừa xong
+                            </span>
+                        </div>
+                    </div>
+                    <button class="play-button w-12 h-12 bg-primary-500 hover:bg-primary-600 transition-all text-white rounded-xl flex items-center justify-center flex-shrink-0 opacity-100 transform-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+            gameElement.innerHTML = gameContent;
+            recentlyPlayedContent.appendChild(gameElement);
+
+            gameElement.addEventListener('click', (event) => {
+                if (!event.target.classList.contains('play-button') && !event.target.closest('.play-button')) {
+                    showGameDetails(game.id);
+                }
+            });
+            const playButton = gameElement.querySelector('.play-button');
+            playButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                launchGame(game);
+            });
+        }
+
+        document.getElementById('refreshButton').addEventListener('click', () => {
+            const button = document.getElementById('refreshButton');
+            const originalContent = button.innerHTML;
+            button.innerHTML = `
+                <div class="loader"></div>
+            `;
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+            }, 1000);
+        });
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(navItem => {
+                    navItem.classList.remove('active');
+                    navItem.classList.remove('text-primary-500', 'dark:text-primary-400');
+                    navItem.classList.add('text-gray-500', 'dark:text-gray-400');
+                });
+                item.classList.add('active');
+                item.classList.remove('text-gray-500', 'dark:text-gray-400');
+                item.classList.add('text-primary-500', 'dark:text-primary-400');
+            });
+        });
+
+        document.getElementById('deviceDropdown').addEventListener('click', () => {
+            console.log('Lựa chọn thiết bị được click');
+        });
+
+        function createGameCard(game) {
+            const gameCard = document.createElement('div');
+            gameCard.className = 'game-card bg-white dark:bg-dark-700 rounded-2xl shadow-lg overflow-hidden relative group';
+            gameCard.dataset.gameId = game.id;
+            gameCard.innerHTML = `
+                <div class="p-3">
+                    <div class="aspect-square rounded-xl overflow-hidden mb-2 shadow-md">
+                        <img src="${game.image}" alt="${game.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    </div>
+                    <div class="pt-1 pb-2">
+                        <h3 class="font-medium text-sm truncate text-gray-800 dark:text-gray-100">${game.title}</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${game.genre}</p>
+                    </div>
+                    <button class="play-button w-full py-2 bg-primary-500 hover:bg-primary-600 transition-all text-white rounded-lg text-sm font-medium flex items-center justify-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Chơi</span>
+                    </button>
+                </div>
+            `;
+
+
+            gameCard.addEventListener('click', (event) => {
+                if (!event.target.classList.contains('play-button') && !event.target.closest('.play-button')) {
+                    showGameDetails(parseInt(gameCard.dataset.gameId));
+                }
+            });
+            const playButton = gameCard.querySelector('.play-button');
+            playButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                launchGame(game);
+            });
+            return gameCard;
+        }
+
+
+        const featuredGamesGrid = document.getElementById('featuredGamesGrid');
+        gamesData.forEach(game => {
+            featuredGamesGrid.appendChild(createGameCard(game));
+        });
+
+
+        const popularGamesGrid = document.getElementById('popularGamesGrid');
+        const popularGames = gamesData.filter(game => game.title === "UgPhone" || game.title === "Redfinger");
+        popularGames.forEach(game => {
+            popularGamesGrid.appendChild(createGameCard(game));
+        });
+
+    </script>
+</body>
+</html>
